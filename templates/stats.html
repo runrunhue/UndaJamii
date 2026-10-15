@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Stats{% endblock %}
+
+{% block content %}
+
+<h2 style="font-size:1.05rem; font-weight:700; margin-bottom:1rem;">Statistics</h2>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="label">Total</div>
+        <div class="value">{{ summary.total or 0 }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Resolved</div>
+        <div class="value">{{ summary.resolved or 0 }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">In Progress</div>
+        <div class="value">{{ summary.in_progress or 0 }}</div>
+    </div>
+    <div class="stat-card accent">
+        <div class="label">High-Priority Open</div>
+        <div class="value">{{ summary.high_unresolved or 0 }}</div>
+    </div>
+</div>
+
+{% if summary.total and summary.total > 0 %}
+<div class="section-head"><span>Status Breakdown</span></div>
+<div class="chart-wrap">
+    <canvas id="statusChart"></canvas>
+</div>
+{% endif %}
+
+{% if monthly %}
+<div class="section-head"><span>Monthly Trend</span></div>
+<div class="chart-wrap">
+    <canvas id="monthlyChart"></canvas>
+</div>
+{% endif %}
+
+<div style="display:flex; gap:.5rem; margin-top:1rem;">
+    <a href="{{ url_for('export_csv') }}" class="btn btn-outline-secondary flex-fill">
+        <i class="bi bi-download"></i> Export CSV
+    </a>
+    {% if summary.resolved and summary.resolved > 0 %}
+    <form method="POST" action="{{ url_for('delete_resolved') }}" class="flex-fill"
+          onsubmit="return confirm('Delete all resolved issues?');">
+        <button class="btn btn-outline-secondary w-100">
+            <i class="bi bi-trash"></i> Clear resolved
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Open', 'In Progress', 'Resolved'],
+                datasets: [{
+                    data: [
+                        {{ summary.open or 0 }},
+                        {{ summary.in_progress or 0 }},
+                        {{ summary.resolved or 0 }}
+                    ],
+                    backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, boxWidth: 8 } }
+                }
+            }
+        });
+    }
+
+    const monthlyCtx = document.getElementById('monthlyChart');
+    if (monthlyCtx) {
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for m in monthly %}'{{ m.month }}',{% endfor %}],
+                datasets: [
+                    {
+                        label: 'Created',
+                        data: [{% for m in monthly %}{{ m.created }},{% endfor %}],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Resolved',
+                        data: [{% for m in monthly %}{{ m.resolved }},{% endfor %}],
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, boxWidth: 8 } }
+                },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+</script>
+{% endblock %}

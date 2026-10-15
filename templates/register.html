@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block subtitle %}Register Issue{% endblock %}
+
+{% block content %}
+
+<div class="form-card">
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Facility Name</label>
+            <input type="text" name="facility" class="form-control"
+                   required maxlength="100" autofocus
+                   placeholder="e.g. Community Hall">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Issue Description</label>
+            <textarea name="description" rows="3" class="form-control"
+                      required maxlength="200"
+                      placeholder="What is wrong?"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-select" required>
+                <option value="1">Low</option>
+                <option value="2" selected>Medium</option>
+                <option value="3">High</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Reported By</label>
+            <input type="text" name="reported_by" class="form-control"
+                   maxlength="100" placeholder="Anonymous">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Assign To (optional)</label>
+            <input type="text" name="assigned_to" class="form-control"
+                   maxlength="100" placeholder="Staff member">
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Due Date (optional)</label>
+            <input type="date" name="due_date" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-check-lg"></i> Register Issue
+        </button>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Filter{% endblock %}
+
+{% block content %}
+
+<h2 style="font-size:1.05rem; font-weight:700; margin-bottom:1rem;">Filter Issues</h2>
+
+<form method="GET" action="{{ url_for('filter_page') }}">
+    <div class="filter-panel">
+        <div class="group">
+            <label>Status</label>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                <option value="1" {% if filters.status == '1' %}selected{% endif %}>Open</option>
+                <option value="2" {% if filters.status == '2' %}selected{% endif %}>In Progress</option>
+                <option value="3" {% if filters.status == '3' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Priority</label>
+            <select name="priority" class="form-select">
+                <option value="">All priorities</option>
+                <option value="3" {% if filters.priority == '3' %}selected{% endif %}>High</option>
+                <option value="2" {% if filters.priority == '2' %}selected{% endif %}>Medium</option>
+                <option value="1" {% if filters.priority == '1' %}selected{% endif %}>Low</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Facility Name</label>
+            <input type="text" name="facility" class="form-control"
+                   value="{{ filters.facility }}" placeholder="Any">
+        </div>
+        <div class="group">
+            <label>Sort By</label>
+            <select name="sort" class="form-select">
+                <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Newest first</option>
+                <option value="oldest" {% if filters.sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+                <option value="priority" {% if filters.sort == 'priority' %}selected{% endif %}>Priority</option>
+                <option value="status" {% if filters.sort == 'status' %}selected{% endif %}>Status</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:.5rem; margin-bottom:1.5rem;">
+        <button type="submit" class="btn btn-primary flex-fill">
+            <i class="bi bi-funnel"></i> Apply
+        </button>
+        <a href="{{ url_for('filter_page') }}" class="btn btn-outline-secondary flex-fill">
+            Clear
+        </a>
+    </div>
+</form>
+
+<div class="section-head"><span>Results</span><span>{{ issues|length }}</span></div>
+
+{% if issues %}
+<div class="issue-list">
+    {% for issue in issues %}
+    <a class="issue-card" href="{{ url_for('edit', ticket_id=issue.id) }}">
+        <div class="top">
+            <span class="ticket">#{{ issue.id }}</span>
+            <span class="badge-priority
+                {% if issue.priority == 3 %}high
+                {% elif issue.priority == 2 %}medium
+                {% else %}low{% endif %}">
+                {{ priority_names[issue.priority] }}
+            </span>
+        </div>
+        <div class="facility">{{ issue.facility }}</div>
+        <div class="description">{{ issue.description }}</div>
+        <div class="bottom">
+            <span>{{ issue.reported_by }} · {{ issue.created_at[:10] }}</span>
+            <span class="badge-status
+                {% if issue.status == 3 %}resolved
+                {% elif issue.status == 2 %}progress
+                {% else %}open{% endif %}">
+                {{ status_names[issue.status] }}
+            </span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-search"></i>
+    <p>No issues match these filters.</p>
+</div>
+{% endif %}
+
+{% endblock %}

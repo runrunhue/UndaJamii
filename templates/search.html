@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Search{% endblock %}
+{% block subtitle %}Search{% endblock %}
+
+{% block content %}
+
+<div class="form-card mb-3">
+    <form method="POST" class="d-flex gap-2">
+        <input type="number" name="ticket_id" class="form-control"
+               placeholder="Ticket ID" required autofocus>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+</div>
+
+{% if searched %}
+    {% if issue %}
+        <div class="result-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Ticket #{{ issue.id }}</strong>
+                <span class="badge-status
+                    {% if issue.status == 3 %}resolved
+                    {% elif issue.status == 2 %}progress
+                    {% else %}open{% endif %}">
+                    {{ status_names[issue.status] }}
+                </span>
+            </div>
+
+            <div class="row-line">
+                <span class="key">Facility</span>
+                <span>{{ issue.facility }}</span>
+            </div>
+            <div class="row-line">
+                <span class="key">Description</span>
+                <span>{{ issue.description }}</span>
+            </div>
+            <div class="row-line">
+                <span class="key">Priority</span>
+                <span class="badge-priority
+                    {% if issue.priority == 3 %}high
+                    {% elif issue.priority == 2 %}medium
+                    {% else %}low{% endif %}">
+                    {{ priority_names[issue.priority] }}
+                </span>
+            </div>
+            <div class="row-line">
+                <span class="key">Reported By</span>
+                <span>{{ issue.reported_by }}</span>
+            </div>
+            <div class="row-line">
+                <span class="key">Created</span>
+                <span>{{ issue.created_at }}</span>
+            </div>
+
+            <a href="{{ url_for('edit', ticket_id=issue.id) }}" class="btn btn-primary w-100 mt-3">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> No ticket found with that ID.
+        </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

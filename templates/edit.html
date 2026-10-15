@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Edit Ticket{% endblock %}
+{% block subtitle %}Ticket #{{ issue.id }}{% endblock %}
+
+{% block content %}
+
+{% if is_overdue(issue) %}
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    This issue is past its due date ({{ issue.due_date }}).
+</div>
+{% endif %}
+
+<div class="form-card mb-3">
+    <form method="POST">
+        <input type="hidden" name="action" value="update">
+
+        <div class="mb-3">
+            <label class="form-label">Facility Name</label>
+            <input type="text" name="facility" class="form-control"
+                   value="{{ issue.facility }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" rows="3" class="form-control" required>{{ issue.description }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-select">
+                {% for value, label in priority_names.items() %}
+                    <option value="{{ value }}" {% if issue.priority == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                {% for value, label in status_names.items() %}
+                    <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Reported By</label>
+            <input type="text" name="reported_by" class="form-control" value="{{ issue.reported_by }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Assigned To</label>
+            <input type="text" name="assigned_to" class="form-control" value="{{ issue.assigned_to }}">
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Due Date</label>
+            <input type="date" name="due_date" class="form-control" value="{{ issue.due_date }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mb-2">
+            <i class="bi bi-check-lg"></i> Save Changes
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary w-100">Cancel</a>
+    </form>
+</div>
+
+<div class="form-card">
+    <div class="section-head" style="margin-top:0;">Updates &amp; Comments</div>
+
+    {% if comments %}
+    <div class="comment-list">
+        {% for c in comments %}
+        <div class="comment">
+            <div class="meta">{{ c.author }} · {{ c.created_at }}</div>
+            <div class="body">{{ c.body }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted" style="font-size:.88rem;">No comments yet.</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="hidden" name="action" value="comment">
+        <div class="mb-2">
+            <input type="text" name="author" class="form-control" placeholder="Your name (optional)">
+        </div>
+        <div class="mb-2">
+            <textarea name="body" rows="2" class="form-control" placeholder="Add an update..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-outline-primary w-100">
+            <i class="bi bi-chat-dots"></i> Add Comment
+        </button>
+    </form>
+</div>
+
+{% endblock %}

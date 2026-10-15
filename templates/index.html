@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="label">Total</div>
+        <div class="value">{{ summary.total or 0 }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Open</div>
+        <div class="value">{{ summary.open or 0 }}</div>
+    </div>
+    <div class="stat-card span-2 accent">
+        <div class="label">High-Priority Open</div>
+        <div class="value">{{ summary.high_unresolved or 0 }}</div>
+    </div>
+</div>
+
+{% if overdue_count > 0 %}
+<div class="alert alert-danger" style="border-radius:12px;">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>{{ overdue_count }}</strong> issue(s) are past their due date.
+</div>
+{% endif %}
+
+<div class="section-head">
+    <span>Recent Issues</span>
+    <a href="{{ url_for('filter_page') }}">Filter</a>
+</div>
+
+{% if issues %}
+<div class="issue-list">
+    {% for issue in issues %}
+    <a class="issue-card" href="{{ url_for('edit', ticket_id=issue.id) }}">
+        <div class="top">
+            <span class="ticket">
+                #{{ issue.id }}
+                {% if is_overdue(issue) %}<span class="overdue-tag">Overdue</span>{% endif %}
+            </span>
+            <span class="badge-priority
+                {% if issue.priority == 3 %}high
+                {% elif issue.priority == 2 %}medium
+                {% else %}low{% endif %}">
+                {{ priority_names[issue.priority] }}
+            </span>
+        </div>
+        <div class="facility">{{ issue.facility }}</div>
+        <div class="description">{{ issue.description }}</div>
+        <div class="bottom">
+            <span>{{ issue.reported_by }} · {{ issue.created_at[:10] }}</span>
+            <span class="badge-status
+                {% if issue.status == 3 %}resolved
+                {% elif issue.status == 2 %}progress
+                {% else %}open{% endif %}">
+                {{ status_names[issue.status] }}
+            </span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <p>No issues yet.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Register Issue
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}
